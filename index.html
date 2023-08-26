@@ -1803,23 +1803,29 @@
 											<div class="screen-reader-response animation-element">
 												<p role="status" aria-live="polite" aria-atomic="true"></p>
 											</div>
-											<form action="./assets/php/mailer.php" method="post" class="lqd-cf-form" novalidate="novalidate" data-status="init">
+											<form id="my-form" action="https://formspree.io/f/xdorgklz" method="POST">
 												<div class="row -mr-15 -ml-15 flex-wrap">
 													<div class="col col-12 col-md-6 px-15">
 														<p>
 															<span class="lqd-form-control-wrap text">
-																<input class="border-black-20 text-black text-13" type="text" name="name" value="" size="40" aria-required="true" aria-invalid="false" placeholder="What's your name?">
+																<input class="border-black-20 text-black text-13" type="text" name="name" value="" required size="40" aria-required="true" aria-invalid="false" placeholder="What's your name?">
 															</span>
 														</p>
 													</div>
 													<div class="col col-12 col-md-6 px-15">
 														<p>
 															<span class="lqd-form-control-wrap email">
-																<input class="border-black-20 text-black text-13" type="email" name="email" value="" size="40" aria-required="true" aria-invalid="false" placeholder="Email Address">
+																<input class="border-black-20 text-black text-13" type="email" name="email" value="" required size="40" aria-required="true" aria-invalid="false" placeholder="Email Address">
 															</span>
 														</p>
 													</div>
-													<div class="col col-12 col-md-6 px-15">
+													<input type="text" name="_gotcha" class="gotcha" />
+													<style type="text/css">
+														.gotcha {
+															display: none !important;
+														}
+													</style>
+													<!-- <div class="col col-12 col-md-6 px-15">
 														<p>
 															<span class="lqd-form-control-wrap tel">
 																<input class="border-black-20 text-black text-13" type="text" name="topic" value="" size="40" aria-required="true" aria-invalid="false" placeholder="Select a Discussion Topic">
@@ -1832,15 +1838,15 @@
 																<input class="border-black-20 text-black text-13" type="text" name="budget" value="" size="40" aria-required="true" aria-invalid="false" placeholder="What's your budget?">
 															</span>
 														</p>
-													</div>
+													</div> -->
 													<div class="col col-12 px-15">
 														<p>
 															<span class="lqd-form-control-wrap textarea">
-																<textarea class="border-black-20 text-black text-13" name="message" cols="10" rows="6" aria-required="true" aria-invalid="false" placeholder="A brief description about your project/request/consultation"></textarea>
+																<textarea class="border-black-20 text-black text-13" required name="message" cols="10" rows="6" aria-required="true" aria-invalid="false" placeholder="A brief description about your project/request/consultation"></textarea>
 															</span>
 														</p>
 													</div>
-													<div class="col col-12 px-15">
+													<!-- <div class="col col-12 px-15">
 														<span class="lqd-form-control-wrap acceptance">
 															<span class="lqd-cf-form-control lqd-cf-acceptance">
 																<span class="lqd-cf-list-item">
@@ -1851,13 +1857,70 @@
 																</span>
 															</span>
 														</span>
-													</div>
+													</div> -->
 													<div class="col col-md-12 px-15">
-														<input type="submit" value="— send message" class="lqd-cf-form-control lqd-cf-submit border-0 bg-black text-14 text-white">
+														<input type="submit" id="submit" value="Send Message" class="lqd-cf-form-control lqd-cf-submit border-0 bg-black text-14 text-white">
 													</div>
 												</div>
+
+												<input name="subject" type="hidden" value="MedWise - New submission from {{ name }}" />
 											</form>
-											<div class="lqd-cf-response-output"></div>
+											<div class="lqd-cf-response-output" id="form-message-success" style="display: none;">
+												<p class="form-message form-success" id="form-message-success-text"></p>
+											</div>
+											<div class="lqd-cf-response-output" id="form-message-error" style="display: none;">
+												<p class="form-message form-error" id="form-message-error-text"></p>
+											</div>
+											<script>
+												var form = document.getElementById("my-form");
+												var submit = document.getElementById("submit");
+												var successElem = document.getElementById('form-message-success')
+												var successElemText = document.getElementById('form-message-success-text')
+												var errorElem = document.getElementById('form-message-error')
+												var errorElemText = document.getElementById('form-message-error-text')
+												
+												async function handleSubmit(event) {
+												  event.preventDefault();
+												  var data = new FormData(event.target);
+
+												  submit.disabled = true
+												  submit.value = 'Sending...'
+												  
+												  fetch(event.target.action, {
+													method: form.method,
+													body: data,
+													headers: {
+														'Accept': 'application/json'
+													}
+												  }).then(response => {
+													if (response.ok) {
+													  successElem.style.display = 'block'
+													  successElemText.innerHTML = "Thanks for your submission. We will reach out to you shortly.";
+													  submit.value = 'Message Sent'
+													} else {
+													  submit.value = 'Send Message'
+
+													  response.json().then(data => {
+														errorElem.style.display = 'block'
+														errorElem.style.display = 'block'
+														if (Object.hasOwn(data, 'errors')) {
+														  errorElemText.innerHTML = data["errors"].map(error => error["message"]).join(", ")
+														} else {
+														  errorElemText.innerHTML = "Oops! There was a problem submitting your form"
+														}
+														submit.disabled = false
+													  })
+													}
+												  }).catch(error => {
+													errorElem.style.display = 'block'
+													submit.value = 'Send Message'
+													errorElemText.innerHTML = "Oops! There was a problem submitting your form"
+													submit.disabled = false
+												  });
+												}
+
+												form.addEventListener("submit", handleSubmit)
+											</script>
 										</div>
 									</div>
 								</div>
@@ -2119,7 +2182,7 @@
 		<div class="lqd-cc lqd-cc--outer fixed top-0 left-0 pointer-events-none"></div>
 		<!-- End custom cursor -->
 
-		<template id="lqd-snickersbar">
+		<!-- <template id="lqd-snickersbar">
 			<div class="lqd-snickersbar flex flex-wrap lqd-snickersbar-in" data-item-id>
 				<div class="lqd-snickersbar-inner flex flex-wrap items-center">
 					<div class="lqd-snickersbar-detail">
@@ -2143,7 +2206,7 @@
 				</div>
 				<button class="lity-close" type="button" aria-label="Close (Press escape to close)" data-lity-close>&times;</button>
 			</div>
-		</div>
+		</div> -->
 	</body>
 
 </html>
